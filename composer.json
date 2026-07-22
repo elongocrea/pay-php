@@ -2,7 +2,7 @@
     "name": "elongo/pay-php",
     "description": "SDK PHP officiel pour Elongo Pay — sessions de checkout et vérification des webhooks.",
     "type": "library",
-    "license": "proprietary",
+    "license": "MIT",
     "require": {
         "php": "^8.2",
         "ext-curl": "*",
