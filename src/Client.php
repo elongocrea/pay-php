@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Elongo\Pay;
 
 use Elongo\Pay\Exception\ApiException;
+use Elongo\Pay\Resource\Balance;
 use Elongo\Pay\Resource\Checkout;
 use Elongo\Pay\Resource\Payments;
+use Elongo\Pay\Resource\Refunds;
+use Elongo\Pay\Resource\Transactions;
 
 /**
  * Client de l'API Elongo Pay.
@@ -20,6 +23,12 @@ final class Client
     public readonly Checkout $checkout;
 
     public readonly Payments $payments;
+
+    public readonly Transactions $transactions;
+
+    public readonly Refunds $refunds;
+
+    public readonly Balance $balance;
 
     private Transport $transport;
 
@@ -35,6 +44,9 @@ final class Client
 
         $this->checkout = new Checkout($this);
         $this->payments = new Payments($this);
+        $this->transactions = new Transactions($this);
+        $this->refunds = new Refunds($this);
+        $this->balance = new Balance($this);
     }
 
     /**
