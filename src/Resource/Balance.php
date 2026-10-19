@@ -8,6 +8,11 @@ use Elongo\Pay\Client;
 
 /**
  * Solde du marchand.
+ *
+ * @deprecated Fonction historique d'Elongo Pay, en cours de retrait : les
+ *             paiements sont encaisses directement sur le compte de
+ *             l'etablissement chez l'agregateur. L'endpoint v1/balance
+ *             repondra 404 une fois la fonction coupee cote serveur.
  */
 final class Balance
 {
