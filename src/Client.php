@@ -20,6 +20,8 @@ use Elongo\Pay\Resource\Transactions;
  */
 final class Client
 {
+    public const DEFAULT_BASE_URL = 'https://api.elongopay.cd';
+
     public readonly Checkout $checkout;
 
     public readonly Payments $payments;
@@ -39,7 +41,9 @@ final class Client
         ?string $baseUrl = null,
         ?Transport $transport = null,
     ) {
-        $this->baseUrl = rtrim($baseUrl ?? 'https://api.elongopay.cd', '/');
+        // Une variable d'environnement vide (PAY_API_URL=) vaut « non fournie ».
+        $baseUrl = $baseUrl !== null && trim($baseUrl) !== '' ? trim($baseUrl) : self::DEFAULT_BASE_URL;
+        $this->baseUrl = rtrim($baseUrl, '/');
         $this->transport = $transport ?? new CurlTransport;
 
         $this->checkout = new Checkout($this);
