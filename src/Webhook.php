@@ -20,6 +20,15 @@ final class Webhook
 {
     public const TOLERANCE = 300;
 
+    /** Session de checkout payee. */
+    public const CHECKOUT_SESSION_COMPLETED = 'checkout.session.completed';
+
+    /** Charge directe (POST /v1/payments/*) reussie. */
+    public const PAYMENT_SUCCEEDED = 'payment.succeeded';
+
+    /** Charge directe echouee. */
+    public const PAYMENT_FAILED = 'payment.failed';
+
     /**
      * Verifie la signature et renvoie l'evenement decode.
      *
@@ -41,6 +50,11 @@ final class Webhook
 
     public static function verify(string $payload, string $header, string $secret, int $tolerance = self::TOLERANCE, ?int $now = null): bool
     {
+        // Secret vide (configuration absente) : n'importe qui pourrait signer.
+        if (trim($secret) === '') {
+            return false;
+        }
+
         $parts = self::parse($header);
         if (! isset($parts['t'], $parts['v1'])) {
             return false;

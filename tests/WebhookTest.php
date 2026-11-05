@@ -39,3 +39,24 @@ it('rejette une signature trop ancienne', function () {
 it('leve une exception sur signature invalide', function () {
     Webhook::constructEvent('{}', 't=1,v1=deadbeef', 'whsec_test');
 })->throws(ElongoPayException::class);
+
+/**
+ * Regression: un secret vide (variable d'environnement absente) produisait un
+ * HMAC que n'importe qui peut recalculer : un faux « paiement reussi »
+ * passait la verification.
+ */
+it('refuse toute signature quand le secret est vide', function () {
+    $payload = '{"type":"checkout.session.completed"}';
+    $header = sign($payload, '', time());
+
+    expect(Webhook::verify($payload, $header, ''))->toBeFalse()
+        ->and(fn () => Webhook::constructEvent($payload, $header, ''))->toThrow(ElongoPayException::class);
+});
+
+it('verifie un evenement payment.succeeded de charge directe', function () {
+    $payload = '{"id":"evt_1","type":"payment.succeeded","data":{"object":"payment","reference":"CMD-1","status":"success"}}';
+    $event = Webhook::constructEvent($payload, sign($payload, 'whsec_test', time()), 'whsec_test');
+
+    expect($event['type'])->toBe(Webhook::PAYMENT_SUCCEEDED)
+        ->and($event['data']['reference'])->toBe('CMD-1');
+});
