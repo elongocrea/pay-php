@@ -65,13 +65,23 @@ try {
     exit;
 }
 
-if ($event['type'] === 'checkout.session.completed') {
-    $session = $event['data'];
-    // Marquer la commande $session['client_reference_id'] comme payée.
-}
+match ($event['type']) {
+    Webhook::CHECKOUT_SESSION_COMPLETED => marquerPayee($event['data']['client_reference_id']),
+    Webhook::PAYMENT_SUCCEEDED => marquerPayee($event['data']['reference']), // charge directe
+    Webhook::PAYMENT_FAILED => marquerEchouee($event['data']['reference']),
+    default => null, // type inconnu : ignorer, répondre 200
+};
 
 http_response_code(200);
 ```
+
+Le secret `whsec_…` est celui de l'**application** qui porte la clé API (une
+application, donc une clé, par intégration). Un secret vide est toujours refusé.
+
+| Événement | `data` |
+|---|---|
+| `checkout.session.completed` | la session (`id`, `client_reference_id`, `amount`, `currency`, `metadata`) |
+| `payment.succeeded` / `payment.failed` | le paiement d'une charge directe (`id`, `reference`, `status`, `amount`, `currency`) |
 
 ### Le schéma de signature
 
@@ -94,6 +104,12 @@ composer install
 ## Configuration avancée
 
 ```php
-// Environnement de test, ou transport personnalisé (tests, proxy).
+// URL de l'API (vide ou null = https://api.elongopay.cd), transport personnalisé.
 $pay = new Client('sk_test_…', 'https://api.elongopay.cd', $transport);
 ```
+
+### Mode test
+
+Une clé `sk_test_…` n'appelle jamais d'agrégateur : le paiement est simulé
+immédiatement. Un numéro se terminant par `0000` simule un échec, tout autre
+numéro un succès. Aucun mouvement de fonds réel.

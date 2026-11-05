@@ -53,3 +53,16 @@ it('leve une ApiException sur erreur', function () {
     expect(fn () => $pay->checkout->create([]))
         ->toThrow(ApiException::class, 'success_url manquant');
 });
+
+/**
+ * Regression: une URL de base vide (PAY_API_URL= dans le .env) donnait des
+ * requetes sans hote, au lieu de l'API de production par defaut.
+ */
+it('une URL de base vide retombe sur l API par defaut', function () {
+    $transport = new FakeTransport(200, json_encode(['id' => 'cs_test_abc']));
+    $pay = new Client('sk_test_key', '', $transport);
+
+    $pay->checkout->retrieve('cs_test_abc');
+
+    expect($transport->lastRequest['url'])->toBe('https://api.elongopay.cd/v1/checkout/sessions/cs_test_abc');
+});
