@@ -37,12 +37,12 @@ final class CurlTransport implements Transport
 
         if ($response === false) {
             $error = curl_error($handle);
-            curl_close($handle);
             throw new NetworkException($error !== '' ? $error : 'Requête réseau échouée.');
         }
 
+        // Pas de curl_close() : sans effet depuis PHP 8.0, deprecie en 8.5. La
+        // poignee est liberee a la sortie de portee.
         $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
-        curl_close($handle);
 
         return ['status' => $status, 'body' => (string) $response];
     }
