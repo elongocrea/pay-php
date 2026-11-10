@@ -1,9 +1,11 @@
 name: tests
 
 on:
-  push:
-    branches: [main]
+  # Tests en ligne uniquement sur les PR vers staging et main (tout est testé
+  # en local avant push). Lancement manuel possible.
   pull_request:
+    branches: [staging, main]
+  workflow_dispatch:
 
 jobs:
   pest:
